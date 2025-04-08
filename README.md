@@ -1,9 +1,10 @@
 <p align="center" width="100%">
+  ADAPT: Auction-Based Dynamic Prioritization for Multi-Agent Coordination
 </p>
 
-<div id="top" align="center">
 
-ADAPT: Auction-Based Dynamic Prioritization for Multi-Agent Coordination
+
+
 
 ## Overview
 

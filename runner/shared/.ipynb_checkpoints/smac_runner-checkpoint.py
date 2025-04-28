@@ -5,6 +5,7 @@ from functools import reduce
 import torch
 from ADAPT.runner.shared.base_runner import Runner
 
+
 def _t2n(x):
     return x.detach().cpu().numpy()
 
@@ -119,7 +120,8 @@ class SMACRunner(Runner):
                                             np.concatenate(self.buffer.rnn_states[step]),
                                             np.concatenate(self.buffer.rnn_states_critic[step]),
                                             np.concatenate(self.buffer.masks[step]),
-                                            np.concatenate(self.buffer.available_actions[step]))
+                                            np.concatenate(self.buffer.available_actions[step]),
+                                            scoring_network=self.trainer.scoring_network)
         # [self.envs, agents, dim]
         values = np.array(np.split(_t2n(value), self.n_rollout_threads))
         actions = np.array(np.split(_t2n(action), self.n_rollout_threads))
@@ -182,7 +184,8 @@ class SMACRunner(Runner):
                                         np.concatenate(eval_rnn_states),
                                         np.concatenate(eval_masks),
                                         np.concatenate(eval_available_actions),
-                                        deterministic=True)
+                                        deterministic=True,
+                                        scoring_network=self.trainer.scoring_network)
             eval_actions = np.array(np.split(_t2n(eval_actions), self.n_eval_rollout_threads))
             eval_rnn_states = np.array(np.split(_t2n(eval_rnn_states), self.n_eval_rollout_threads))
             

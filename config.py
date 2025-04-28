@@ -308,8 +308,8 @@ def get_config():
     parser.add_argument("--alg_seed", type=int, default=1)
     parser.add_argument("--no_relation_enhanced", action='store_true', default=False)
 
-    parser.add_argument("--epsilon", type=float, default=0.1)
-    parser.add_argument("--Threshold_loc_radio", type=float, default=0.9)
+    parser.add_argument("--epsilon", type=float, default=0.5)
+    parser.add_argument("--message_dim", type=int, default=24)
     parser.add_argument("--Threshold_Real_radio", type=float, default=0.9)
     
     return parser

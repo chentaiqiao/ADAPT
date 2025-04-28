@@ -1,15 +1,13 @@
-<p align="center" width="100%">
-  ADAPT: Auction-Based Dynamic Prioritization for Multi-Agent Coordination
-</p>
 
-
+# Learning Multi-Agent Communication from Graph Modeling Perspective
 
 
 ## Overview
 
-Effective coordination in multi-agent systems remains challenging in dynamic and partially observable environments, where agents must reason over evolving interdependencies and limited communication bandwidth. We propose **ADAPT** : Auction-based Dynamic Action Priority Technique, a unified framework for multi-agent coordination that integrates message compression, dependency estimation, and a novel auction-based dynamic prioritization mechanism.
-
-In ADAPT, agents exchange compact messages and compute dependency scores to determine how much their behavior depends on others. A distributed auction protocol then assigns priority positions, guiding autoregressive decision-making in a manner aligned with inter-agent influence. This enables flexible, influence-aware coordination without centralized control or extensive communication rounds. Experiments on SMACv2 and Google Research Football (GRF) show that ADAPT achieves higher win rates, faster convergence, and lower communication cost compared to state-of-the-art baselines. Further analyses confirm its scalability to large teams, compatibility with value decomposition, and runtime efficiency. These results highlight ADAPT's potential for scalable and responsive multi-agent coordination under real-world constraints.
+In numerous artificial intelligence applications, the collaborative efforts of multiple intelligent agents are imperative for the successful attainment of target objectives. To enhance coordination among these agents, a distributed communication framework is often employed. However, information sharing among all agents proves to be resource-intensive, while the adoption of a manually pre-defined communication architecture imposes limitations on inter-agent communication, thereby constraining the potential for collaborative efforts.
+    
+In this study, we introduce a novel approach wherein we conceptualize the communication architecture among agents as a learnable graph. 
+We formulate this problem as the task of determining the communication graph while enabling the architecture parameters to update normally, thus necessitating a bi-level optimization process. Utilizing continuous relaxation of the graph representation and incorporating attention units, our proposed approach, CommFormer, efficiently optimizes the communication graph and concurrently refines architectural parameters through gradient descent in an end-to-end manner. Extensive experiments on a variety of cooperative tasks substantiate the robustness of our model across diverse cooperative scenarios, where agents are able to develop more coordinated and sophisticated strategies regardless of changes in the number of agents. 
 
 
 ## Installation
@@ -31,8 +29,14 @@ Please following the instructios in https://github.com/google-research/football.
 
 
 ## Quick Start
-When your environment is ready, you could run shells in the "scripts" folder with algo="ADAPT". For example:
+
+When your environment is ready, you could run shells in the "scripts" folder with algo="commformer_dec". For example:
+
 ``` Bash
 bash ./train_smacv2.sh  # run ADAPT on SMACv2
 ```
 If you would like to change the configs of experiments, you could modify sh files or look for config.py for more details.
+
+
+
+

@@ -84,9 +84,7 @@ class RelationMultiheadAttention(nn.Module):
         nn.init.constant_(self.out_proj.bias, 0.)
 
     def forward(self, query, key, value, relation, attn_mask=None, need_weights=False, dec_agent=False):
-        """ Input shape: Time x Batch x Channel
-            relation:  tgt_len x src_len x bsz x n_emd
-        """
+
         qkv_same = query.data_ptr() == key.data_ptr() == value.data_ptr()
         kv_same = key.data_ptr() == value.data_ptr()
 
@@ -442,14 +440,14 @@ class Decoder(nn.Module):
         return logit
 
 
-class RW_comm(nn.Module):
+class MAT_comm(nn.Module):
 
     def __init__(self, state_dim, obs_dim, action_dim, n_agent,
                  n_block, n_embd, n_head, encode_state=False, device=torch.device("cpu"),
                  action_type='Discrete', dec_actor=False, share_actor=False, k_steps=20, 
                  warmup=10, post_stable=False, post_ratio=0.5, self_loop_add=True,
                  no_relation_enhanced=False):
-        super(RW_comm, self).__init__()
+        super(MAT_comm, self).__init__()
 
         self.n_agent = n_agent
         self.action_dim = action_dim
@@ -559,7 +557,7 @@ class RW_comm(nn.Module):
 
         return action_log, v_loc, entropy
 
-    def get_actions(self, args, state, obs, available_actions=None, deterministic=False):
+    def get_actions(self, args, state, obs, available_actions=None, deterministic=False,scoring_network=None):
         self.time_step += 1 
         # state unused
         ori_shape = np.shape(obs)
@@ -591,7 +589,8 @@ class RW_comm(nn.Module):
         if self.action_type == "Discrete":#into transformer_act.py
             output_action, output_action_log = discrete_autoregreesive_act(args, self.decoder, obs_rep, obs, relations_embed, relations, batch_size,
                                                                            self.n_agent, self.action_dim, self.tpdv,
-                                                                           available_actions, deterministic, dec_agent=dec_agent,time_step=self.time_step)
+                                                                           available_actions, deterministic, dec_agent=dec_agent,time_step=self.time_step,
+                                                                           scoring_network=scoring_network)
                                                                            
 
 

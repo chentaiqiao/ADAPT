@@ -3,20 +3,12 @@ import numpy as np
 from ADAPT.utils.util import update_linear_schedule
 from ADAPT.utils.util import get_shape_from_obs_space, get_shape_from_act_space
 from ADAPT.algorithms.utils.util import check
-from ADAPT.algorithms.mat.algorithm.cformer import RW_comm as MAT
+from ADAPT.algorithms.mat.algorithm.cformer import MAT_comm as MAT
 
 
 
 class TransformerPolicy:
-    """
-    MAT Policy  class. Wraps actor and critic networks to compute actions and value function predictions.
 
-    :param args: (argparse.Namespace) arguments containing relevant model and policy information.
-    :param obs_space: (gym.Space) observation space.
-    :param cent_obs_space: (gym.Space) value function input space (centralized input for MAPPO, decentralized for IPPO).
-    :param action_space: (gym.Space) action space.
-    :param device: (torch.device) specifies the device to run on (cpu/gpu).
-    """
 
     def __init__(self, args, obs_space, cent_obs_space, act_space, num_agents, device=torch.device("cpu")):
         self.device = device
@@ -61,20 +53,6 @@ class TransformerPolicy:
         if args.env_name == "hands":
             self.transformer.zero_std()
 
-        # count the volume of parameters of model
-        # Total_params = 0
-        # Trainable_params = 0
-        # NonTrainable_params = 0
-        # for param in self.transformer.parameters():
-        #     mulValue = np.prod(param.size())
-        #     Total_params += mulValue
-        #     if param.requires_grad:
-        #         Trainable_params += mulValue
-        #     else:
-        #         NonTrainable_params += mulValue
-        # print(f'Total params: {Total_params}')
-        # print(f'Trainable params: {Trainable_params}')
-        # print(f'Non-trainable params: {NonTrainable_params}')
 
         self.optimizer = torch.optim.Adam(self.transformer.model_parameters(),
                                           lr=self.lr, eps=self.opti_eps,
@@ -83,32 +61,11 @@ class TransformerPolicy:
                                           lr=self.edge_lr)
 
     def lr_decay(self, episode, episodes):
-        """
-        Decay the actor and critic learning rates.
-        :param episode: (int) current training episode.
-        :param episodes: (int) total number of training episodes.
-        """
+
         update_linear_schedule(self.optimizer, episode, episodes, self.lr)
 
     def get_actions(self, cent_obs, obs, rnn_states_actor, rnn_states_critic, masks, available_actions=None,
-                    deterministic=False):
-        """
-        Compute actions and value function predictions for the given inputs.
-        :param cent_obs (np.ndarray): centralized input to the critic.
-        :param obs (np.ndarray): local agent inputs to the actor.
-        :param rnn_states_actor: (np.ndarray) if actor is RNN, RNN states for actor.
-        :param rnn_states_critic: (np.ndarray) if critic is RNN, RNN states for critic.
-        :param masks: (np.ndarray) denotes points at which RNN states should be reset.
-        :param available_actions: (np.ndarray) denotes which actions are available to agent
-                                  (if None, all actions available)
-        :param deterministic: (bool) whether the action should be mode of distribution or should be sampled.
-
-        :return values: (torch.Tensor) value function predictions.
-        :return actions: (torch.Tensor) actions to take.
-        :return action_log_probs: (torch.Tensor) log probabilities of chosen actions.
-        :return rnn_states_actor: (torch.Tensor) updated actor network RNN states.
-        :return rnn_states_critic: (torch.Tensor) updated critic network RNN states.
-        """
+                    deterministic=False,scoring_network=None):
 
         cent_obs = cent_obs.reshape(-1, self.num_agents, self.share_obs_dim)
         obs = obs.reshape(-1, self.num_agents, self.obs_dim)
@@ -118,7 +75,8 @@ class TransformerPolicy:
         actions, action_log_probs, values = self.transformer.get_actions(self.args, cent_obs,
                                                                          obs,
                                                                          available_actions,
-                                                                         deterministic)
+                                                                         deterministic,
+                                                                         scoring_network=scoring_network)
 
         actions = actions.view(-1, self.act_num)
         action_log_probs = action_log_probs.view(-1, self.act_num)
@@ -130,14 +88,6 @@ class TransformerPolicy:
         return values, actions, action_log_probs, rnn_states_actor, rnn_states_critic
 
     def get_values(self, cent_obs, obs, rnn_states_critic, masks, available_actions=None):
-        """
-        Get value function predictions.
-        :param cent_obs (np.ndarray): centralized input to the critic.
-        :param rnn_states_critic: (np.ndarray) if critic is RNN, RNN states for critic.
-        :param masks: (np.ndarray) denotes points at which RNN states should be reset.
-
-        :return values: (torch.Tensor) value function predictions.
-        """
 
         cent_obs = cent_obs.reshape(-1, self.num_agents, self.share_obs_dim)
         obs = obs.reshape(-1, self.num_agents, self.obs_dim)
@@ -152,22 +102,7 @@ class TransformerPolicy:
 
     def evaluate_actions(self, cent_obs, obs, rnn_states_actor, rnn_states_critic, actions, masks,
                          available_actions=None, active_masks=None, steps=0, total_step=0):
-        """
-        Get action logprobs / entropy and value function predictions for actor update.
-        :param cent_obs (np.ndarray): centralized input to the critic.
-        :param obs (np.ndarray): local agent inputs to the actor.
-        :param rnn_states_actor: (np.ndarray) if actor is RNN, RNN states for actor.
-        :param rnn_states_critic: (np.ndarray) if critic is RNN, RNN states for critic.
-        :param actions: (np.ndarray) actions whose log probabilites and entropy to compute.
-        :param masks: (np.ndarray) denotes points at which RNN states should be reset.
-        :param available_actions: (np.ndarray) denotes which actions are available to agent
-                                  (if None, all actions available)
-        :param active_masks: (torch.Tensor) denotes whether an agent is active or dead.
 
-        :return values: (torch.Tensor) value function predictions.
-        :return action_log_probs: (torch.Tensor) log probabilities of the input actions.
-        :return dist_entropy: (torch.Tensor) action distribution entropy for the given inputs.
-        """
         cent_obs = cent_obs.reshape(-1, self.num_agents, self.share_obs_dim)
         obs = obs.reshape(-1, self.num_agents, self.obs_dim)
         actions = actions.reshape(-1, self.num_agents, self.act_num)
@@ -187,16 +122,8 @@ class TransformerPolicy:
 
         return values, action_log_probs, entropy
 
-    def act(self, cent_obs, obs, rnn_states_actor, masks, available_actions=None, deterministic=True):
-        """
-        Compute actions using the given inputs.
-        :param obs (np.ndarray): local agent inputs to the actor.
-        :param rnn_states_actor: (np.ndarray) if actor is RNN, RNN states for actor.
-        :param masks: (np.ndarray) denotes points at which RNN states should be reset.
-        :param available_actions: (np.ndarray) denotes which actions are available to agent
-                                  (if None, all actions available)
-        :param deterministic: (bool) whether the action should be mode of distribution or should be sampled.
-        """
+    def act(self, cent_obs, obs, rnn_states_actor, masks, available_actions=None, deterministic=True,scoring_network=None):
+
 
         # this function is just a wrapper for compatibility
         rnn_states_critic = np.zeros_like(rnn_states_actor)
@@ -206,7 +133,8 @@ class TransformerPolicy:
                                                               rnn_states_critic,
                                                               masks,
                                                               available_actions,
-                                                              deterministic)
+                                                              deterministic,
+                                                              scoring_network=scoring_network)
 
         return actions, rnn_states_actor
 

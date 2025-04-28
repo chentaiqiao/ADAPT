@@ -9,7 +9,9 @@ from ADAPT.algorithms.utils.transformer_act import *
 from torch.distributions import Categorical, Normal
 import torch.optim as optim
 
-
+def compute_entropy(x, dim=-1, eps=1e-12):
+    p = x + eps
+    return -torch.sum(p * torch.log(p), dim=dim)
 
 class MATTrainer:
     """
@@ -51,6 +53,7 @@ class MATTrainer:
         self._post_stable = args.post_stable
         self._post_ratio = args.post_ratio
         self.edge_lr=args.edge_lr
+        
         
         if self._use_valuenorm:
             self.value_normalizer = ValueNorm(1, device=self.device)
@@ -128,10 +131,19 @@ class MATTrainer:
         optimizer.zero_grad()
         logits = scoring_network(dependency_vectors)
 
-        loss = criterion(logits, final_P_tensor)
+        loss = criterion(logits, final_P_tensor)#可能需要检查final_P_tensor[i]
         
-        with torch.autograd.detect_anomaly():
-            loss.backward()
+        #############
+        print('score_loss',loss)   
+        with open('score_loss.txt', 'a') as file:
+            file.write(str(score_loss) + '\n')
+        v_t=logits
+        soft_priority = torch.softmax(v_t, dim=-1)
+        prio_entropy = compute_entropy(soft_priority).mean().item()
+        #############
+        
+
+        loss.backward()
         optimizer.step()
 
 
@@ -197,6 +209,16 @@ class MATTrainer:
             self.policy.optimizer.zero_grad()
             if (index+1) % 5 == 0:
                 self.policy.edge_optimizer.zero_grad()
+                
+                
+        #############
+        print('policy_loss',policy_loss)
+        print('value_loss',value_loss)
+        with open('policy_loss.txt', 'a') as file:
+            file.write(str(policy_loss) + '\n')
+        with open('value_loss.txt', 'a') as file:
+            file.write(str(value_loss) + '\n')
+        #############
         
         loss.backward()
 

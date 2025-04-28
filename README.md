@@ -1,3 +1,4 @@
+
 # Learning Multi-Agent Communication from Graph Modeling Perspective
 
 
@@ -28,7 +29,9 @@ Please following the instructios in https://github.com/google-research/football.
 
 
 ## Quick Start
+
 When your environment is ready, you could run shells in the "scripts" folder with algo="commformer_dec". For example:
+
 ``` Bash
 bash ./train_smacv2.sh  # run ADAPT on SMACv2
 ```

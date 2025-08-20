@@ -4,8 +4,6 @@
 
 ## Overview
 
-### Overview
-
 This repository contains the official implementation of ADAPT (Auction-based Dynamic Action Priority Technique), a dynamic coordination framework for multi-agent reinforcement learning (MARL) designed to enhance coordination under partial observability and synchronous execution. ADAPT combines:
 
 - **Transformer-based observation encoding** to extract compact and informative features from high-dimensional observations.

@@ -49,7 +49,7 @@ If you would like to change the configs of experiments, you could modify sh file
 
 If you find this project helpful, please consider to cite the following paper:
 
-```
+```bibtex
 @inproceedings{Xie2025ADAPT,
   author    = {Xie, Zaipeng and Qiao, Chentai and Yang, Nuo and Zhao, Yiming},
   title     = {ADAPT: Auction-Based Dynamic Prioritization for Multi-Agent Coordination},

@@ -12,7 +12,7 @@ This repository contains the official implementation of ADAPT (Auction-based Dyn
 - **Autoregressive action inference** to model a learned causal order for policy inference.
 - **Observation reconstruction** to recover global observation embeddings from compact messages.
 
-Experiments on StarCraft Multi-Agent Challenge v2 (SMACv2) and Google Research Football (GRF) show that ADAPT achieves significantly higher win rates and reduced communication overhead compared to state-of-the-art baselines. For example, on SMACv2's \texttt{Terran\_10\_vs\_11} map, ADAPT attains a win rate of 53.70%, surpassing CommFormer (31.47%) and SeqComm (30.41%). ADAPT also demonstrates strong generalization on GRF tasks. In terms of communication efficiency, ADAPT reduces message bytes per timestep by up to 51.54% compared to SeqComm and 3.77% compared to CommFormer.
+Experiments on StarCraft Multi-Agent Challenge v2 (SMACv2) and Google Research Football (GRF) show that ADAPT achieves significantly higher win rates and reduced communication overhead compared to state-of-the-art baselines. For example, on SMACv2's Terran_10_vs_11 map, ADAPT attains a win rate of 53.70%, surpassing CommFormer (31.47%) and SeqComm (30.41%). ADAPT also demonstrates strong generalization on GRF tasks. In terms of communication efficiency, ADAPT reduces message bytes per timestep by up to 51.54% compared to SeqComm and 3.77% compared to CommFormer.
 
 
 ## Instructions
